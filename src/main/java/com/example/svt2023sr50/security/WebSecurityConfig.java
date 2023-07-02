@@ -62,17 +62,14 @@ public class WebSecurityConfig {
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
-        // svim korisnicima dopusti da pristupe sledecim putanjama:
-        // komunikacija izmedju klijenta i servera je stateless posto je u pitanju REST aplikacija
-        // ovo znaci da server ne pamti nikakvo stanje, tokeni se ne cuvaju na serveru
-        // ovo nije slucaj kao sa sesijama koje se cuvaju na serverskoj strani - STATEFUL aplikacija
-        http.sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS);
+               http.sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS);
 
         // sve neautentifikovane zahteve obradi uniformno i posalji 401 gresku
 //        http.exceptionHandling().authenticationEntryPoint(restAuthenticationEntryPoint);
         http.authorizeRequests()
                 .antMatchers(HttpMethod.POST, "/api/auth/login").permitAll()
                 .antMatchers(HttpMethod.POST, "/api/auth/signup").permitAll()
+                .antMatchers(HttpMethod.GET, "/api/post/allposts").permitAll()
 //                .antMatchers(HttpMethod.GET, "/api/auth/whoami").permitAll()
 //                .antMatchers(HttpMethod.GET, "/api/post/all").permitAll()
                 // ukoliko ne zelimo da koristimo @PreAuthorize anotacije nad metodama kontrolera, moze se iskoristiti hasRole() metoda da se ogranici

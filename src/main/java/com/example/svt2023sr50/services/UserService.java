@@ -1,7 +1,6 @@
 package com.example.svt2023sr50.services;
 
 import com.example.svt2023sr50.Constructor.UserConstruct;
-import com.example.svt2023sr50.model.Post;
 import com.example.svt2023sr50.model.User;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -25,6 +24,9 @@ public class UserService implements IUserService {
     public void setPasswordEncoder(PasswordEncoder passwordEncoder){
         this.passwordEncoder = passwordEncoder;
     }
+
+    @Override
+    public User geOne(Long userId) { return userRepository.getOne(userId);};
     @Override
     public User findByUsername(String username) {
         Optional<User> user = userRepository.findByUsername(username);

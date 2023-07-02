@@ -23,11 +23,22 @@ public class UserController {
     private PasswordEncoder passwordEncoder;
 
     @Transactional
-    @PutMapping("/updatepassword")
-    public ResponseEntity<User> create(@RequestBody User newUser) {
-        newUser.setRole(Role.USER);
-        newUser.setPassword(passwordEncoder.encode(newUser.getPassword()));
-        User updatedUser = service.save(newUser);
-        return new ResponseEntity<>(updatedUser, HttpStatus.CREATED);
+    @PutMapping("/updatepassword/{old}")
+    public ResponseEntity<User> create(@RequestBody User newUser,@PathVariable("old") String oldPassword) {
+
+        String encodedPassword = service.geOne(newUser.getUserId()).getPassword();
+
+        boolean match = passwordEncoder.matches(oldPassword, encodedPassword);
+        System.out.println(oldPassword);
+        System.out.println(service.geOne(newUser.getUserId()).getPassword());
+        if(match){
+            newUser.setRole(Role.USER);
+            newUser.setPassword(passwordEncoder.encode(newUser.getPassword()));
+            User updatedUser = service.save(newUser);
+            return new ResponseEntity<>(updatedUser, HttpStatus.CREATED);
+        }else{
+            return new ResponseEntity<>(newUser, HttpStatus.NOT_ACCEPTABLE);
+        }
+
     }
 }

@@ -16,7 +16,6 @@ public class CommentService {
 
     private final CommentRepository repository;
 
-    private final PostRepository postRepository;
     @Transactional
     public Comment save(Comment comment) {
         return repository.save(comment);
@@ -25,9 +24,4 @@ public class CommentService {
     @Transactional
     public void delete(Comment comment){repository.delete(comment);}
 
-    public List<Comment> allCommentsOfPost(Long id){
-        Post temp = postRepository.getById(id);
-        return temp.getComments();
-
-    }
 }

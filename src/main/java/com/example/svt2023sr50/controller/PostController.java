@@ -2,8 +2,11 @@ package com.example.svt2023sr50.controller;
 
 
 import com.example.svt2023sr50.model.Comment;
+import com.example.svt2023sr50.model.Like;
 import com.example.svt2023sr50.model.Post;
+import com.example.svt2023sr50.model.User;
 import com.example.svt2023sr50.services.CommentService;
+import com.example.svt2023sr50.services.LikeService;
 import com.example.svt2023sr50.services.PostService;
 import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -21,6 +24,8 @@ public class PostController {
     private final PostService service;
 
     private final CommentService commentService;
+
+    private final LikeService likeService;
     @PostMapping("/new")
     public ResponseEntity<Post> create(@RequestBody Post newPost) {
         Post addedPost = service.save(newPost);
@@ -59,16 +64,53 @@ public class PostController {
     @PutMapping("/comment/{id}")
     public ResponseEntity<Comment> comment(@PathVariable("id") Long id, @RequestBody Comment comment) {
         Post post = service.getPost(id);
-        List<Comment> comments = new ArrayList<>();
-        if(!post.getComments().isEmpty()){
-             comments = post.getComments();
-        }
         comment.setPost(post);
-        comments.add(comment);
-        post.setComments(comments);
+        post.getComments().add(comment);
         service.save(post);
-//        commentService.save(comment);
+
         return new ResponseEntity<>(comment, HttpStatus.CREATED);
     }
 
+    @PutMapping("/like/{id}/{userId}")
+    public ResponseEntity<Like> like(@PathVariable("id") Long id, @PathVariable("userId") Long userId) {
+        Post post = service.getPost(id);
+//        List<Like> likes = new ArrayList<>();
+//        if(!post.getLikes().isEmpty()){
+//            likes = post.getLikes();
+//        }
+        Like like = new Like();
+        like.setPost(post);
+        like.setUserId(userId);
+//        likes.add(like);
+//        post.setLikes(likes);
+        post.getLikes().add(like);
+        service.save(post);
+
+
+
+        return new ResponseEntity<>(like, HttpStatus.CREATED);
+    }
+
+    @DeleteMapping("/unlike/{id}/{userId}")
+    public ResponseEntity<?> unlike(@PathVariable("id") Long id, @PathVariable("userId") Long userId) {
+        Post post = service.getPost(id);
+        List<Like> likes = post.getLikes();
+        Like likeToRemove = new Like();
+
+        for (Like like : likes) {
+            if (like.getUserId().equals(userId)) {
+                likeToRemove = like;
+                break;
+            }
+        }
+            likes.remove(likeToRemove);
+            likeService.delete(likeToRemove);
+            service.save(post);
+            return new ResponseEntity<>(HttpStatus.OK);
+    }
 }
+
+
+
+
+
