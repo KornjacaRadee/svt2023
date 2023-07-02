@@ -34,7 +34,7 @@ public class AuthService {
 
     @Autowired
     TokenUtils tokenUtils;
-    // STAOO VAMOO NECE NESTO JEBEM MU SE SA MAMOML
+
     private final AuthenticationManager authenticationManager;
     @Transactional
     public void singup(RegisterRequest request){

@@ -36,6 +36,10 @@ public class Group {
     @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Post> posts;
 
+    @ManyToOne
+    @JoinColumn(name = "userId", nullable = false)
+    private User user;
+
     @Column(nullable = false)
     private boolean isSuspended;
 
