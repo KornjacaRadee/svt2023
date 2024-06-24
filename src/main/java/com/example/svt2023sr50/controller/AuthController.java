@@ -4,6 +4,8 @@ package com.example.svt2023sr50.controller;
 import com.example.svt2023sr50.Constructor.LoginRequest;
 import com.example.svt2023sr50.Constructor.RegisterRequest;
 import com.example.svt2023sr50.Constructor.UserTokenState;
+import com.example.svt2023sr50.ElasticsearchService;
+import com.example.svt2023sr50.model.Post;
 import com.example.svt2023sr50.model.User;
 import com.example.svt2023sr50.services.AuthService;
 import com.example.svt2023sr50.services.UserService;
@@ -14,7 +16,9 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
+import java.io.IOException;
 import java.security.Principal;
+import java.util.List;
 
 @RestController
 @RequestMapping("/api/auth")
@@ -25,6 +29,9 @@ public class AuthController {
 
     @Autowired
     UserService userService;
+
+    @Autowired
+    private ElasticsearchService elasticsearchService;
 
     @PostMapping("/signup")
     public ResponseEntity<String> signup(@RequestBody @Validated RegisterRequest registerRequest){
@@ -43,4 +50,6 @@ public class AuthController {
     public User user(Principal user) {
         return this.userService.findByUsername(user.getName());
     }
+
+
 }

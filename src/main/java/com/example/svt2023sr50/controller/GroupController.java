@@ -1,5 +1,6 @@
 package com.example.svt2023sr50.controller;
 
+import com.example.svt2023sr50.ElasticsearchService;
 import com.example.svt2023sr50.model.Group;
 import com.example.svt2023sr50.model.Post;
 import com.example.svt2023sr50.model.User;
@@ -12,6 +13,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.io.IOException;
 import java.util.List;
 
 @RestController
@@ -29,9 +31,13 @@ public class GroupController {
     @Autowired
     GroupService groupService;
 
+    @Autowired
+    private ElasticsearchService elasticsearchService;
+
     @PostMapping("/new")
-    public ResponseEntity<Group> create(@RequestBody Group newGroup) {
+    public ResponseEntity<Group> create(@RequestBody Group newGroup) throws IOException {
         Group addedPost = groupService.save(newGroup);
+        elasticsearchService.indexGroup(newGroup);
         return new ResponseEntity<>(addedPost, HttpStatus.CREATED);
     }
 
@@ -49,6 +55,12 @@ public class GroupController {
     public ResponseEntity<?> delete(@PathVariable("id") Long id) {
         service.delete(id);
         return new ResponseEntity<>("Deleted", HttpStatus.GONE);
+    }
+
+    @GetMapping("/search")
+    public ResponseEntity<List<Group>> searchGroups(@RequestParam("query") String query) throws IOException {
+        List<Group> groups = elasticsearchService.searchGroups(query);
+        return new ResponseEntity<>(groups, HttpStatus.OK);
     }
 
 }

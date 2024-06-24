@@ -1,16 +1,20 @@
 package com.example.svt2023sr50.controller;
 
 
+import com.example.svt2023sr50.MinIOService;
 import com.example.svt2023sr50.model.*;
 import com.example.svt2023sr50.services.CommentService;
 import com.example.svt2023sr50.services.GroupService;
 import com.example.svt2023sr50.services.LikeService;
 import com.example.svt2023sr50.services.PostService;
 import lombok.AllArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -27,8 +31,15 @@ public class PostController {
     private final LikeService likeService;
 
     private final GroupService groupService;
+
+    @Autowired
+    private MinIOService minioService;
     @PostMapping("/new")
-    public ResponseEntity<Post> create(@RequestBody Post newPost) {
+    public ResponseEntity<Post> create(@RequestBody Post newPost, @RequestParam("file") MultipartFile file) throws IOException, IOException {
+        // Upload file to MinIO and get URL
+        // Assuming you have a method in MinIOService to handle file upload
+        String fileUrl = minioService.uploadFile("documents", file.getOriginalFilename(), file.getInputStream(), file.getSize(), file.getContentType());
+        newPost.setUrl(fileUrl);
         Post addedPost = service.save(newPost);
         return new ResponseEntity<>(addedPost, HttpStatus.CREATED);
     }
@@ -46,7 +57,7 @@ public class PostController {
         return new ResponseEntity<>(HttpStatus.OK);
     }
     @PostMapping("/update")
-    public ResponseEntity<Post> updatePost(@RequestBody Post updatedPost) {
+    public ResponseEntity<Post> updatePost(@RequestBody Post updatedPost) throws IOException {
         Post newPost = service.save(updatedPost);
         return new ResponseEntity<>(newPost, HttpStatus.OK);
     }
@@ -60,7 +71,7 @@ public class PostController {
 
 
     @PutMapping("/comment/{id}")
-    public ResponseEntity<Comment> comment(@PathVariable("id") Long id, @RequestBody Comment comment) {
+    public ResponseEntity<Comment> comment(@PathVariable("id") Long id, @RequestBody Comment comment) throws IOException {
         Post post = service.getPost(id);
         comment.setPost(post);
         post.getComments().add(comment);
@@ -70,7 +81,7 @@ public class PostController {
     }
 
     @PutMapping("/like/{id}/{userId}")
-    public ResponseEntity<Like> like(@PathVariable("id") Long id, @PathVariable("userId") Long userId) {
+    public ResponseEntity<Like> like(@PathVariable("id") Long id, @PathVariable("userId") Long userId) throws IOException {
         Post post = service.getPost(id);
 
         Like like = new Like();
@@ -85,7 +96,7 @@ public class PostController {
     }
 
     @DeleteMapping("/unlike/{id}/{userId}")
-    public ResponseEntity<?> unlike(@PathVariable("id") Long id, @PathVariable("userId") Long userId) {
+    public ResponseEntity<?> unlike(@PathVariable("id") Long id, @PathVariable("userId") Long userId) throws IOException {
         Post post = service.getPost(id);
         List<Like> likes = post.getLikes();
         Like likeToRemove = new Like();

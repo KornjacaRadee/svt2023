@@ -30,8 +30,6 @@ public class Group {
     @Column
     private String descripiton;
 
-    @Column(nullable = false)
-    private LocalDate creationDate;
 
     @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Post> posts;
@@ -45,7 +43,6 @@ public class Group {
 
 
     public Group() {
-        this.creationDate = LocalDate.now();
         this.isSuspended = false;
     }
 }

@@ -1,9 +1,11 @@
 package com.example.svt2023sr50.services;
 
+import com.example.svt2023sr50.ElasticsearchService;
 import com.example.svt2023sr50.model.Group;
 import com.example.svt2023sr50.model.Post;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import com.example.svt2023sr50.Constructor.LoginRequest;
 import com.example.svt2023sr50.Constructor.RegisterRequest;
@@ -13,6 +15,7 @@ import com.example.svt2023sr50.security.*;
 import com.example.svt2023sr50.repository.*;
 
 import javax.transaction.Transactional;
+import java.io.IOException;
 import java.util.List;
 
 @Service
@@ -25,6 +28,9 @@ public class PostService {
 
     public final GroupRepository groupRepository;
 
+    @Autowired
+    private ElasticsearchService elasticsearchService;
+
     public List<Post> getAll() {
         return postRepository.findAll();
     }
@@ -32,8 +38,10 @@ public class PostService {
         return postRepository.findById(id).get();
     }
     @Transactional
-    public Post save(Post post) {
+    public Post save(Post post) throws IOException {
+        elasticsearchService.indexPost(post);
         return postRepository.save(post);
+
     }
 
 
