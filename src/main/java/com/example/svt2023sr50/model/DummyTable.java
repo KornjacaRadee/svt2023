@@ -19,6 +19,12 @@ public class DummyTable {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
 
+    @Column(name = "groupId")
+    private Long groupId;
+
+    @Column(name = "postId")
+    private Long postId;
+
     @Column(name = "mime_type")
     private String mimeType;
 

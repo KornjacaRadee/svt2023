@@ -28,9 +28,9 @@ public class PostController {
 
     private final GroupService groupService;
     @PostMapping("/new")
-    public ResponseEntity<Post> create(@RequestBody Post newPost) {
+    public ResponseEntity<String> create(@RequestBody Post newPost) {
         Post addedPost = service.save(newPost);
-        return new ResponseEntity<>(addedPost, HttpStatus.CREATED);
+        return new ResponseEntity<>(newPost.getPostName(), HttpStatus.CREATED);
     }
 
     @DeleteMapping("/delete/{id}")

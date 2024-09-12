@@ -10,7 +10,7 @@ import java.util.List;
 @Service
 public interface SearchGroupService {
 
-    Page<GroupIndex> simpleSearch(List<String> keywords, Pageable pageable);
+    List<GroupIndex> simpleSearch(List<String> keywords, Pageable pageable);
 
     Page<GroupIndex> advancedSearch(List<String> expression, Pageable pageable);
 

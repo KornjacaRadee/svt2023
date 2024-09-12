@@ -3,11 +3,16 @@ package com.example.svt2023sr50.services.impl;
 import co.elastic.clients.elasticsearch._types.query_dsl.BoolQuery;
 import co.elastic.clients.elasticsearch._types.query_dsl.Query;
 import com.example.svt2023sr50.exceptionhandling.exception.MalformedQueryException;
+import com.example.svt2023sr50.indeexmodel.DummyIndex;
 import com.example.svt2023sr50.indeexmodel.GroupIndex;
+import com.example.svt2023sr50.indexrepository.DummyIndexRepository;
+import com.example.svt2023sr50.model.Group;
+import com.example.svt2023sr50.repository.GroupRepository;
 import com.example.svt2023sr50.services.interfaces.SearchGroupService;
 import lombok.RequiredArgsConstructor;
 import org.elasticsearch.common.unit.Fuzziness;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.elasticsearch.client.elc.NativeQuery;
 import org.springframework.data.elasticsearch.client.elc.NativeQueryBuilder;
@@ -16,6 +21,7 @@ import org.springframework.data.elasticsearch.core.SearchHitSupport;
 import org.springframework.data.elasticsearch.core.mapping.IndexCoordinates;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -24,15 +30,43 @@ public class GroupSearchServiceImpl implements SearchGroupService {
 
     private final ElasticsearchOperations elasticsearchTemplate;
 
+
+    private final GroupRepository groupRepository;
+    private final DummyIndexRepository dummyIndexRepository;
+    // Search using a list of keywords
+
     @Override
-    public Page<GroupIndex> simpleSearch(List<String> keywords, Pageable pageable) {
-        var searchQueryBuilder =
-                new NativeQueryBuilder().withQuery(buildSimpleSearchQuery(keywords))
-                        .withPageable(pageable);
+    public List<GroupIndex> simpleSearch(List<String> keywords, Pageable pageable) {
+        List<GroupIndex> combinedResults = new ArrayList<>();
 
-        return runQuery(searchQueryBuilder.build());
+        // Loop through each keyword and perform search
+        for (String keyword : keywords) {
+            // Step 1: Search groups by name or description
+            List<Group> groupSearchResults = groupRepository
+                    .findByNameContainingOrDescripitonContaining(keyword,keyword);
+            for (Group group : groupSearchResults) {
+                GroupIndex groupIndex = new GroupIndex();
+                groupIndex.setId(group.getId());
+                groupIndex.setName(group.getName());
+                groupIndex.setDescription(group.getDescripiton());
+                combinedResults.add(groupIndex);
+            }
+
+            // Step 2: Search PDF content (DummyIndex) and return groups associated with the PDFs
+            List<DummyIndex> dummyIndexes = dummyIndexRepository.findByContentSrContainingOrTitleContaining(keyword,keyword);
+            for (DummyIndex dummyIndex : dummyIndexes) {
+                groupRepository.findById(dummyIndex.getGroupId()).ifPresent(group -> {
+                    GroupIndex groupIndex = new GroupIndex();
+                    groupIndex.setId(group.getId());
+                    groupIndex.setName(group.getName());
+                    groupIndex.setDescription(group.getDescripiton());
+                    combinedResults.add(groupIndex);
+                });
+            }
+        }
+
+        return combinedResults;
     }
-
     @Override
     public Page<GroupIndex> advancedSearch(List<String> expression, Pageable pageable) {
         if (expression.size() != 3) {

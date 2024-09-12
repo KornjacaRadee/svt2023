@@ -9,6 +9,7 @@ import org.springframework.data.elasticsearch.annotations.Field;
 import org.springframework.data.elasticsearch.annotations.FieldType;
 import org.springframework.data.elasticsearch.annotations.Setting;
 
+import javax.persistence.Column;
 import javax.persistence.Id;
 
 @Getter
@@ -27,6 +28,12 @@ public class DummyIndex {
 
     @Field(type = FieldType.Text, store = true, name = "content_sr", analyzer = "serbian_simple", searchAnalyzer = "serbian_simple")
     private String contentSr;
+
+    @Field(type = FieldType.Integer, store = true, name = "groupId")
+    private Long groupId;
+
+    @Field(type = FieldType.Integer, store = true, name = "postId")
+    private Long postId;
 
     @Field(type = FieldType.Text, store = true, name = "content_en", analyzer = "english", searchAnalyzer = "english")
     private String contentEn;

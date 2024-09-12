@@ -1,5 +1,7 @@
 package com.example.svt2023sr50.controller;
 
+import com.example.svt2023sr50.indeexmodel.PostIndex;
+import com.example.svt2023sr50.indexrepository.PostIndexRepository;
 import com.example.svt2023sr50.model.Group;
 import com.example.svt2023sr50.model.Post;
 import com.example.svt2023sr50.model.User;
@@ -29,10 +31,27 @@ public class GroupController {
     @Autowired
     GroupService groupService;
 
+    @Autowired
+    PostIndexRepository indexRepository;
+
     @PostMapping("/new")
     public ResponseEntity<Group> create(@RequestBody Group newGroup) {
         Group addedPost = groupService.save(newGroup);
         return new ResponseEntity<>(addedPost, HttpStatus.CREATED);
+    }
+
+    @PostMapping("/new-post")
+    public ResponseEntity<List<Post>> createPost(@RequestBody Group newGroup) {
+        Group addedPost = groupService.save(newGroup);
+        List<Post> posts = addedPost.getPosts();
+        Post post = posts.get(posts.size() - 1);
+        PostIndex index = new PostIndex();
+        index.setId(post.getPostId());
+        index.setPostName(post.getPostName());
+        index.setContent(post.getContent());
+        indexRepository.save(index);
+
+        return new ResponseEntity<>(addedPost.getPosts(), HttpStatus.CREATED);
     }
 
     @GetMapping("/all")

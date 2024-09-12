@@ -38,6 +38,76 @@ public class IndexingServiceImpl implements IndexingService {
 
     @Override
     @Transactional
+    public String indexDocumentForGroup(Long groupId, MultipartFile documentFile) {
+        var newEntity = new DummyTable();
+        var newIndex = new DummyIndex();
+
+        // Set the group ID in the DummyTable and DummyIndex
+        newEntity.setGroupId(groupId);
+        newIndex.setGroupId(groupId);
+
+        var title = Objects.requireNonNull(documentFile.getOriginalFilename()).split("\\\\.")[0];
+        newIndex.setTitle(title);
+        newEntity.setTitle(title);
+
+        var documentContent = extractDocumentContent(documentFile);
+        if (detectLanguage(documentContent).equals("SR")) {
+            newIndex.setContentSr(documentContent);
+        } else {
+            newIndex.setContentEn(documentContent);
+        }
+
+        String serverFilename = UUID.randomUUID().toString() + ".pdf";
+        fileService.store(documentFile, serverFilename);
+        newIndex.setServerFilename(serverFilename);
+        newEntity.setServerFilename(serverFilename);
+
+        newEntity.setMimeType(detectMimeType(documentFile));
+        var savedEntity = dummyRepository.save(newEntity);
+
+        newIndex.setDatabaseId(savedEntity.getId());
+        dummyIndexRepository.save(newIndex);
+
+        return serverFilename;
+    }
+
+    @Override
+    @Transactional
+    public String indexDocumentForPosts(Long groupId, MultipartFile documentFile) {
+        var newEntity = new DummyTable();
+        var newIndex = new DummyIndex();
+
+        // Set the group ID in the DummyTable and DummyIndex
+        newEntity.setPostId(groupId);
+        newIndex.setPostId(groupId);
+
+        var title = Objects.requireNonNull(documentFile.getOriginalFilename()).split("\\\\.")[0];
+        newIndex.setTitle(title);
+        newEntity.setTitle(title);
+
+        var documentContent = extractDocumentContent(documentFile);
+        if (detectLanguage(documentContent).equals("SR")) {
+            newIndex.setContentSr(documentContent);
+        } else {
+            newIndex.setContentEn(documentContent);
+        }
+
+        String serverFilename = UUID.randomUUID().toString() + ".pdf";
+        fileService.store(documentFile, serverFilename);
+        newIndex.setServerFilename(serverFilename);
+        newEntity.setServerFilename(serverFilename);
+
+        newEntity.setMimeType(detectMimeType(documentFile));
+        var savedEntity = dummyRepository.save(newEntity);
+
+        newIndex.setDatabaseId(savedEntity.getId());
+        dummyIndexRepository.save(newIndex);
+
+        return serverFilename;
+    }
+
+    @Override
+    @Transactional
     public String indexDocument(MultipartFile documentFile) {
         var newEntity = new DummyTable();
         var newIndex = new DummyIndex();

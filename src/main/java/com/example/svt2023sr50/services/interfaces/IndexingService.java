@@ -7,4 +7,7 @@ import org.springframework.web.multipart.MultipartFile;
 public interface IndexingService {
 
     String indexDocument(MultipartFile documentFile);
+    public String indexDocumentForGroup(Long groupId, MultipartFile documentFile);
+
+    public String indexDocumentForPosts(Long postId, MultipartFile documentFile);
 }
